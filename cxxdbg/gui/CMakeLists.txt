@@ -53,17 +53,9 @@ endif()
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 
-# Common code for GUI
-# Always build static library for GUI code because Qt signals don't work
-# with shared libraries on Windows without Q_DECL_EXPORT/Q_DECL_IMPORT
+# Common GUI code
 
-if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-    set(gui_lib_type STATIC)
-else()
-    set(gui_lib_type ${LIBRARY_TYPE})
-endif()
-
-add_library(cxxdbg-gui ${gui_lib_type}
+set(cxxdbg_gui_sources
             pch_gui.hpp
             cxxdbg_connect.cpp
             cxxdbg_connect.hpp
@@ -169,17 +161,6 @@ add_library(cxxdbg-gui ${gui_lib_type}
             Utils.cpp
             Utils.h)
 
-target_precompile_headers(cxxdbg-gui PRIVATE pch_gui.hpp)
-target_link_libraries(cxxdbg-gui PUBLIC tmvc-qt cxxdbg-app cxxdbg-dbg-appcore)
-target_link_libraries(cxxdbg-gui PUBLIC ${qt_name}::Widgets)
-target_link_libraries(cxxdbg-gui PUBLIC ${qt_name}::Svg)
-install_cxxdbg_library(cxxdbg-gui)
-
-# Linkling with Qt6::QXcbIntegrationPlugin for static Qt build
-if(TARGET ${qt_name}::QXcbIntegrationPlugin)
-    target_link_libraries(cxxdbg-gui PUBLIC ${qt_name}::QXcbIntegrationPlugin)
-endif()
-
 
 # Debugger
 
@@ -231,9 +212,18 @@ add_executable(cxxdbg MACOSX_BUNDLE
                TerminalSettingsWidget.cpp
                TerminalSettingsWidget.h
                WatchListColorConverter.h
+               ${cxxdbg_gui_sources}
                ${cxxdbg_additional_sources})
 
 target_precompile_headers(cxxdbg PRIVATE pch_cxxdbg.hpp)
+
+target_link_libraries(cxxdbg PRIVATE tmvc-qt cxxdbg-app cxxdbg-dbg-appcore)
+target_link_libraries(cxxdbg PRIVATE ${qt_name}::Widgets)
+target_link_libraries(cxxdbg PRIVATE ${qt_name}::Svg)
+
+if(TARGET ${qt_name}::QXcbIntegrationPlugin)
+    target_link_libraries(cxxdbg PRIVATE ${qt_name}::QXcbIntegrationPlugin)
+endif()
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows" AND "${CXXDBG_DISABLE_WINDOWS_CONSOLE}")
     target_link_options(cxxdbg PRIVATE -Wl,-subsystem,windows)
@@ -284,8 +274,6 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
                        ${sign_cmd}
                        COMMENT "Running macdeployqt and codesign...")
 endif()
-
-target_link_libraries(cxxdbg PRIVATE cxxdbg-gui)
 
 # Desktop file for linux
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
