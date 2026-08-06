@@ -7,8 +7,8 @@
 
 # Contains CXXDBG version information
 
-set(CXXDBG_VERSION_MAJOR          1)
-set(CXXDBG_VERSION_MINOR          7)
+set(CXXDBG_VERSION_MAJOR          0)
+set(CXXDBG_VERSION_MINOR          1)
 set(CXXDBG_VERSION_PATCHLEVEL     0)
 
 # default version name is major.minor.patchlevel
