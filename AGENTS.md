@@ -151,3 +151,10 @@ into their own repositories, vendored under `libs/` and added via
 - `dbgfmt` — C++ debugger value/type formatting framework (pretty-printing
   of variables/expressions for the STL and other types); see
   [libs/dbgfmt/README.md](libs/dbgfmt/README.md).
+
+## CMake conventions
+
+- Always reference variables as `"${VAR}"` (quoted) in conditionals and
+  comparisons, even where CMake would tolerate the bare form.
+- Split multi-condition `if(...)` expressions across multiple lines, one
+  condition per line, instead of one long line.
