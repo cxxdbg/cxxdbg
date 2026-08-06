@@ -10,6 +10,7 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/../app/version.cmake")
 # searching for Qt
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
 
 if("${CXXDBG_USE_QT6}")
     set(qt_name "Qt6")
@@ -35,6 +36,15 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     endif()
     message(STATUS "Detected ${qt_name} install prefix: ${_qt_install_prefix} (system Qt: ${CXXDBG_QT_IS_SYSTEM})")
 endif()
+
+# Detecting if static or shared Qt is used
+get_target_property(_qt_core_type ${qt_name}::Core TYPE)
+if("${_qt_core_type}" STREQUAL "STATIC_LIBRARY")
+    set(CXXDBG_QT_IS_STATIC TRUE)
+else()
+    set(CXXDBG_QT_IS_STATIC FALSE)
+endif()
+message(STATUS "Detected ${qt_name} library type: ${_qt_core_type} (static Qt: ${CXXDBG_QT_IS_STATIC})")
 
 if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     add_definitions(-fPIC)
@@ -179,10 +189,10 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     list(APPEND cxxdbg_additional_sources "${CMAKE_CURRENT_SOURCE_DIR}/../../resources/images/icon.rc")
 endif()
 
-if("${CXXDBG_DEPLOYMENT_TYPE}" STREQUAL "Release"
-   AND NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin"
+if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin"
+   AND NOT "${CXXDBG_QT_IS_STATIC}"
    AND NOT "${CXXDBG_QT_IS_SYSTEM}")
-    list(APPEND cxxdbg_additional_sources "qt_conf_gen.cpp")
+    list(APPEND cxxdbg_additional_sources "qt_conf.qrc")
 endif()
 
 add_executable(cxxdbg MACOSX_BUNDLE
@@ -306,13 +316,13 @@ else()
     set(inst_prefix)
 endif()
 
-set(lib_dir "lib/cxxdbg/lib")
+set(lib_dir "lib/cxxdbg")
 
 # set relative rpath for executables
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
     set_property(TARGET cxxdbg PROPERTY INSTALL_RPATH "@executable_path/../Frameworks")
 else()
-    set_property(TARGET cxxdbg PROPERTY INSTALL_RPATH "$ORIGIN/../${lib_dir}")
+    set_property(TARGET cxxdbg PROPERTY INSTALL_RPATH "$ORIGIN/../${lib_dir}/lib")
 endif()
 
 
@@ -329,7 +339,7 @@ install(TARGETS cxxdbg
 
 # Installing Qt libraries
 if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin"
-   AND NOT "${CXXDBG_USE_STATIC_QT}"
+   AND NOT "${CXXDBG_QT_IS_STATIC}"
    AND NOT "${CXXDBG_QT_IS_SYSTEM}")
     set(qt_libs "Widgets" "Gui" "Core" "DBus" "Svg")
     set(qt_additional_libs)
@@ -347,7 +357,7 @@ if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin"
     if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
         set(main_qt_lib_dir "bin")
     else()
-        set(main_qt_lib_dir "${lib_dir}")
+        set(main_qt_lib_dir "${lib_dir}/lib")
     endif()
 
     # detecting Qt libraries and installing them
@@ -387,19 +397,19 @@ if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin"
         endif()
 
         foreach(lib_file ${lib_files})
-            install(FILES "${lib_file}" DESTINATION "${lib_dir}" COMPONENT cxxdbg)
+            install(FILES "${lib_file}" DESTINATION "${lib_dir}/lib" COMPONENT cxxdbg)
         endforeach()
     endforeach()
 
     if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
         # installing qxcb platform plugin
         install(FILES "${qt_libs_dir}/../plugins/platforms/${CMAKE_SHARED_LIBRARY_PREFIX}qxcb${CMAKE_SHARED_LIBRARY_SUFFIX}"
-                DESTINATION "${lib_dir}/platforms"
+                DESTINATION "${lib_dir}/plugins/platforms"
                 COMPONENT cxxdbg)
     elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
         # installing windows platform plugin
         install(FILES "${qt_libs_dir}/../plugins/platforms/qwindows.dll"
-                DESTINATION "${lib_dir}/platforms"
+                DESTINATION "${lib_dir}/plugins/platforms"
                 COMPONENT cxxdbg)
     endif()
 
@@ -414,23 +424,23 @@ if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin"
 
         if(NOT "${theme_libname}" STREQUAL "")
             install(FILES "${qt_libs_dir}/../plugins/platformthemes/lib${theme_libname}.so"
-                    DESTINATION "${lib_dir}/platformthemes"
+                    DESTINATION "${lib_dir}/plugins/platformthemes"
                     COMPONENT cxxdbg)
         endif()
     elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
         install(FILES "${qt_libs_dir}/../plugins/styles/qwindowsvistastyle.dll"
-                DESTINATION "${lib_dir}/styles"
+                DESTINATION "${lib_dir}/plugins/styles"
                 COMPONENT cxxdbg)
     endif()
 
     # installing SVG image support
     install(FILES "${qt_libs_dir}/../plugins/imageformats/${lib_fname_prefix}qsvg${CMAKE_SHARED_LIBRARY_SUFFIX}"
-            DESTINATION "${lib_dir}/imageformats"
+            DESTINATION "${lib_dir}/plugins/imageformats"
             COMPONENT cxxdbg)
 
     # installing ico image support
     install(FILES "${qt_libs_dir}/../plugins/imageformats/${lib_fname_prefix}qico${CMAKE_SHARED_LIBRARY_SUFFIX}"
-    DESTINATION "${lib_dir}/imageformats"
+    DESTINATION "${lib_dir}/plugins/imageformats"
     COMPONENT cxxdbg)
 endif()
 
