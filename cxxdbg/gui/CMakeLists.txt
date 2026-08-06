@@ -19,6 +19,23 @@ endif()
 
 find_package(${qt_name} COMPONENTS "Widgets" "DBus" "Svg")
 
+# Detecting if system Qt is used
+set(CXXDBG_QT_IS_SYSTEM FALSE)
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+    get_target_property(_qmake_executable ${qt_name}::qmake IMPORTED_LOCATION)
+    if(NOT _qmake_executable)
+        message(FATAL_ERROR "Can't detect path to qmake executable")
+    endif()
+
+    execute_process(COMMAND "${_qmake_executable}" -query QT_INSTALL_PREFIX
+                     OUTPUT_VARIABLE _qt_install_prefix
+                     OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if("${_qt_install_prefix}" STREQUAL "/usr")
+        set(CXXDBG_QT_IS_SYSTEM TRUE)
+    endif()
+    message(STATUS "Detected ${qt_name} install prefix: ${_qt_install_prefix} (system Qt: ${CXXDBG_QT_IS_SYSTEM})")
+endif()
+
 if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     add_definitions(-fPIC)
 endif()
@@ -162,7 +179,9 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     list(APPEND cxxdbg_additional_sources "${CMAKE_CURRENT_SOURCE_DIR}/../../resources/images/icon.rc")
 endif()
 
-if("${CXXDBG_DEPLOYMENT_TYPE}" STREQUAL "Release" AND NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+if("${CXXDBG_DEPLOYMENT_TYPE}" STREQUAL "Release"
+   AND NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin"
+   AND NOT "${CXXDBG_QT_IS_SYSTEM}")
     list(APPEND cxxdbg_additional_sources "qt_conf_gen.cpp")
 endif()
 
@@ -309,7 +328,9 @@ install(TARGETS cxxdbg
 
 
 # Installing Qt libraries
-if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin" AND NOT "${CXXDBG_USE_STATIC_QT}")
+if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin"
+   AND NOT "${CXXDBG_USE_STATIC_QT}"
+   AND NOT "${CXXDBG_QT_IS_SYSTEM}")
     set(qt_libs "Widgets" "Gui" "Core" "DBus" "Svg")
     set(qt_additional_libs)
 
