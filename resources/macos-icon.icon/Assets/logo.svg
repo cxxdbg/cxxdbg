@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <title>CxxDbg Braces Target Icon</title>
+  <desc>Standalone vector icon with angular braces and a breakpoint target in a blue and indigo palette.</desc>
+
+  <defs>
+    <linearGradient id="leftBrace" x1="0" y1="0" x2="0.9" y2="1">
+      <stop offset="0%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <linearGradient id="rightBrace" x1="0.1" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#4F46E5"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Transparent background -->
+
+  <!-- Left angular brace -->
+  <path
+    d="M166 78
+       H126
+       L82 126
+       V192
+       L54 220
+       V292
+       L82 320
+       V386
+       L126 434
+       H166
+       L134 398
+       V332
+       L102 300
+       V212
+       L134 180
+       V114
+       Z"
+    fill="url(#leftBrace)"/>
+
+  <!-- Right angular brace -->
+  <path
+    d="M346 78
+       H386
+       L430 126
+       V192
+       L458 220
+       V292
+       L430 320
+       V386
+       L386 434
+       H346
+       L378 398
+       V332
+       L410 300
+       V212
+       L378 180
+       V114
+       Z"
+    fill="url(#rightBrace)"/>
+
+  <!-- Target / breakpoint -->
+  <g fill="none" stroke="#202733" stroke-linecap="round">
+    <circle cx="256" cy="256" r="76" stroke-width="18"/>
+    <path d="M256 132 V178" stroke-width="18"/>
+    <path d="M256 334 V380" stroke-width="18"/>
+    <path d="M132 256 H178" stroke-width="18"/>
+    <path d="M334 256 H380" stroke-width="18"/>
+  </g>
+
+  <!-- Center breakpoint dot -->
+  <circle cx="256" cy="256" r="28" fill="#2563EB"/>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1486" height="482">
+<title>CxxDbg Logo</title>
+<defs>
+<linearGradient id="l" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#2563EB"/><stop offset="1" stop-color="#1D4ED8"/></linearGradient>
+<linearGradient id="r" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#6366F1"/><stop offset="1" stop-color="#4F46E5"/></linearGradient>
+</defs>
+<g transform="translate(9 35)">
+<path d="M166 28H126L82 76V142L54 170V242L82 270V336L126 384H166L134 348V282L102 250V162L134 130V64Z" fill="url(#l)"/>
+<path d="M346 28H386L430 76V142L458 170V242L430 270V336L386 384H346L378 348V282L410 250V162L378 130V64Z" fill="url(#r)"/>
+<g fill="none" stroke="#202733" stroke-linecap="round">
+<circle cx="256" cy="206" r="76" stroke-width="18"/>
+<path d="M256 82V128M256 284V330M132 206H178M334 206H380" stroke-width="18"/>
+</g>
+<circle cx="256" cy="206" r="28" fill="#2563EB"/>
+</g>
+<text x="980" y="320" text-anchor="middle" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="250" font-weight="700" letter-spacing="-5"><tspan fill="#202733">Cxx</tspan><tspan fill="#4F46E5">Dbg</tspan></text>
+</svg>

@@ -1,0 +1,14 @@
+[Desktop Entry]
+Name=CxxDbg
+Comment=Advanced C++ Debugger
+GenericName=Debugger
+Exec=/usr/bin/cxxdbg
+Icon=/usr/share/cxxdbg/images/icon.ico
+Type=Application
+StartupNotify=false
+Categories=Development
+MimeType=application/x-executable
+Keywords=cxxdbg
+
+X-Desktop-File-Install-Version=0.26
+
