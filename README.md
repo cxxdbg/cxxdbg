@@ -13,7 +13,7 @@ Windows are also supported.
   functional objects matched by regular expressions, directly to the
   call target.
 
-- Custom [`dbgfmt`](libs/dbgfmt/README.md) formatting framework
+- Custom [`dbgfmt`](https://github.com/cxxdbg/dbgfmt) formatting framework
   implemented from scratch, with advanced support for the libstdc++
   and libc++ standard libraries. It supports the following types:
   - **Containers**: `array`, `vector`, `deque`, `list`, `forward_list`,
@@ -54,12 +54,12 @@ LLVM/LLDB, is included in this repository as a git submodule.
 Libraries developed for cxxdbg, maintained in separate repositories
 and included in this repository as git submodules in `libs/`:
 
-- [`dbgfmt`](libs/dbgfmt/README.md) — C++ debugger value/type
-  formatting framework.
-- [`cxxtn`](libs/cxxtn/README.md) — helper library for parsing C++
-  type and function names.
-- [`cxxdap`](libs/cxxdap/README.md) — Debug Adapter Protocol (DAP)
-  library.
+- [`dbgfmt`](https://github.com/cxxdbg/dbgfmt) — C++ debugger
+  value/type formatting framework.
+- [`cxxtn`](https://github.com/cxxdbg/cxxtn) — helper library for
+  parsing C++ type and function names.
+- [`cxxdap`](https://github.com/cxxdbg/cxxdap) — Debug Adapter
+  Protocol (DAP) library.
 
 ## External Dependencies
 
