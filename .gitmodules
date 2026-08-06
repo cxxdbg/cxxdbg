@@ -1,0 +1,24 @@
+[submodule "thirdparty/range-v3"]
+	path = thirdparty/range-v3
+	url = git@github.com:ericniebler/range-v3.git
+[submodule "thirdparty/json"]
+	path = thirdparty/json
+	url = git@github.com:nlohmann/json.git
+[submodule "thirdparty/cm"]
+	path = thirdparty/cm
+	url = git@github.com:cxx-lang-tools/cm.git
+[submodule "thirdparty/tmvc"]
+	path = thirdparty/tmvc
+	url = git@github.com:cxx-ui/tmvc.git
+[submodule "libs/cxxdap"]
+	path = libs/cxxdap
+	url = git@github.com:cxxdbg/cxxdap.git
+[submodule "libs/cxxtn"]
+	path = libs/cxxtn
+	url = git@github.com:cxxdbg/cxxtn.git
+[submodule "libs/dbgfmt"]
+	path = libs/dbgfmt
+	url = git@github.com:cxxdbg/dbgfmt.git
+[submodule "llvm-project"]
+	path = llvm-project
+	url = git@github.com:cxxdbg/llvm-project.git
