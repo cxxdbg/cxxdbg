@@ -28,7 +28,10 @@
 #include <lldb/API/SBThread.h>
 #include <lldb/Core/Mangled.h>
 
+#include <boost/dll/runtime_symbol_info.hpp>
+
 #include <cassert>
+#include <cstdlib>
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -70,6 +73,14 @@ debugger_base::debugger_base(async::event_queue & eq):
 main_queue_(eq) {
     // initialize lldb if not initialized
     if (!initialized) {
+#if defined(__linux__)
+        // setting up LLDB_DEBUGSERVER_PATH var to point to lldb-server path
+        fs::path exe_dir{boost::dll::program_location().string()};
+        exe_dir.remove_filename();
+        fs::path lldb_server_path = exe_dir / ".." / "libexec" / "cxxdbg" / "lldb-server";
+        setenv("LLDB_DEBUGSERVER_PATH", lldb_server_path.c_str(), 1);
+#endif
+
         lldb::SBDebugger::Initialize();
         // TODO: do we need this flag after switching to direct memory read?
         //lldb_private::ValueObject::SetOmitEmptyBaseClasses(false);

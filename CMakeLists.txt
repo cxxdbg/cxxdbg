@@ -224,7 +224,7 @@ if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
         set(LLDB_SERVER_PATH "${CMAKE_CURRENT_BINARY_DIR}/cxxdbg.app/Contents/bin/${LLDB_SERVER_EXE_NAME}")
     else()
-        set(LLDB_SERVER_PATH "${CMAKE_CURRENT_BINARY_DIR}/bin/${LLDB_SERVER_EXE_NAME}")
+        set(LLDB_SERVER_PATH "${CMAKE_CURRENT_BINARY_DIR}/libexec/cxxdbg/${LLDB_SERVER_EXE_NAME}")
     endif()
 
     add_custom_command(OUTPUT "${LLDB_SERVER_PATH}"
@@ -239,7 +239,7 @@ if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
         set(inst_prefix "cxxdbg.app/Contents/bin")
     else()
-        set(inst_prefix "bin")
+        set(inst_prefix "libexec/cxxdbg")
     endif()
 
     if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")

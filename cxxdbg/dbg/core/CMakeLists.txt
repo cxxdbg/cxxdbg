@@ -107,7 +107,7 @@ target_link_libraries(cxxdbg-dbg-corellvm PUBLIC cxxdbg-dbg-fmtcore cxxdbg-dbg-f
 target_link_libraries(cxxdbg-dbg-corellvm PUBLIC ranges)
 
 # linking with boost
-#target_link_libraries(cxxdbg-dbg-corellvm PUBLIC Boost::boost)
+target_link_libraries(cxxdbg-dbg-corellvm PUBLIC Boost::dll)
 
 
 # core library
