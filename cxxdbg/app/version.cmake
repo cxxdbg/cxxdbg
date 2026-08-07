@@ -11,15 +11,12 @@ set(CXXDBG_VERSION_MAJOR          0)
 set(CXXDBG_VERSION_MINOR          1)
 set(CXXDBG_VERSION_PATCHLEVEL     0)
 
-# default version name is major.minor.patchlevel
-set(CXXDBG_DEFAULT_VERSION_NAME "${CXXDBG_VERSION_MAJOR}.${CXXDBG_VERSION_MINOR}.${CXXDBG_VERSION_PATCHLEVEL}")
+# numeric version, major.minor.patchlevel
+set(CXXDBG_VERSION_NUMBER "${CXXDBG_VERSION_MAJOR}.${CXXDBG_VERSION_MINOR}.${CXXDBG_VERSION_PATCHLEVEL}")
 set(CXXDBG_VERSION_IS_RELEASE OFF)
 
-if("${CXXDBG_VERSION_NAME}" STREQUAL "")
-    # version name is not set, use default
-    set(CXXDBG_VERSION_NAME "${CXXDBG_DEFAULT_VERSION_NAME}")
-
-    # set is_release flag
+if("${CXXDBG_VERSION_SUFFIX}" STREQUAL "")
+    # no suffix set, this is a release build
     set(CXXDBG_VERSION_IS_RELEASE "true")
 else()
     set(CXXDBG_VERSION_IS_RELEASE "false")

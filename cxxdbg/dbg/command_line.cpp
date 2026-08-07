@@ -102,7 +102,7 @@ void command_line::parse(int argc, char * argv[]) {
 
 
 void command_line::print_help(std::ostream & str, std::string_view product_name) const {
-    std::string ver_str = std::string{product_name} + " version " + cxxdbg::version_full_str;
+    std::string ver_str = std::string{product_name} + " version " + cxxdbg::version_display_str();
     str << ver_str << "\n\n"
         << "Usage: cxxdbg [options] [--args|-- [debuggee command line]]\n\n"
         << opt_desc_;
@@ -110,7 +110,7 @@ void command_line::print_help(std::ostream & str, std::string_view product_name)
 
 
 void command_line::print_version(std::ostream & str, std::string_view product_name) const {
-    std::string ver_str = std::string{product_name} + " version " + cxxdbg::version_full_str;
+    std::string ver_str = std::string{product_name} + " version " + cxxdbg::version_display_str();
     str << ver_str << "\n";
 }
 

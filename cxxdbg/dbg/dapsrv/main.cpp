@@ -127,7 +127,7 @@ int main(int argc, char * argv[]) {
         vars.notify();
 
         std::string ver_str =
-            std::string{"CXXDBG Debug Adapter Protocol server version "} + cxxdbg::version_full_str;
+            std::string{"CXXDBG Debug Adapter Protocol server version "} + cxxdbg::version_display_str();
 
         // displaying help message if help option is specified
         if (vars.count("help")) {

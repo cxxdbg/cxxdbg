@@ -29,7 +29,7 @@ void set_lldb_driver_init_hook(lldb_driver_init_hook_type h);
 
 static std::string cxxdbg_driver_version_hook() {
     std::ostringstream str;
-    str << "cxxdbg version " << cxxdbg::version_full_str << "\n";
+    str << "cxxdbg version " << cxxdbg::version_display_str() << "\n";
     return str.str();
 }
 

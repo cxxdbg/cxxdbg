@@ -8,7 +8,7 @@
 # including version information
 include("${CMAKE_CURRENT_SOURCE_DIR}/version.cmake")
 
-message(STATUS "Version name is set to ${CXXDBG_VERSION_NAME}")
+message(STATUS "Version suffix is set to ${CXXDBG_VERSION_SUFFIX}")
 
 # configuring version_config.hpp header
 configure_file("version_config.hpp.cmake.in" "version_config.hpp" @ONLY)

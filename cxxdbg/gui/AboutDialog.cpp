@@ -77,12 +77,8 @@ AboutDialog::AboutDialog(const QString & productName, QWidget *parent) :
         mainLayout->addSpacing(20);
 
         // version label
-        QString version = tr("%1 version").arg(productName) + " " + cxxdbg::version_name;
-        if (!cxxdbg::version_is_release) {
-            version += " (";
-            version += cxxdbg::version_full_str;
-            version += ")";
-        }
+        QString version = tr("%1 version").arg(productName) + " " +
+                QString::fromStdString(cxxdbg::version_display_str());
 
         version += ".<br>";
 

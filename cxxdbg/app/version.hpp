@@ -11,6 +11,7 @@
 #pragma once
 
 #include "version_config.hpp"
+#include <string>
 
 
 namespace cxxdbg {
@@ -42,8 +43,21 @@ const char * const version_patchlevel_str = CXXDBG_VERSION_PATCHLEVEL_STR;
 const char * const version_full_str =
         CXXDBG_VERSION_MAJOR_STR "." CXXDBG_VERSION_MINOR_STR "." CXXDBG_VERSION_PATCHLEVEL_STR;
 
-/// Version name
-const char * const version_name = CXXDBG_VERSION_NAME;
+/// Version suffix (e.g. a build/dev tag), empty for release builds
+const char * const version_suffix = CXXDBG_VERSION_SUFFIX;
+
+
+/// Full version string for display: version_full_str, with
+/// "(version_suffix)" appended when version_suffix is non-empty
+inline std::string version_display_str() {
+    std::string result = version_full_str;
+    if (version_suffix[0] != '\0') {
+        result += " (";
+        result += version_suffix;
+        result += ")";
+    }
+    return result;
+}
 
 
 }
