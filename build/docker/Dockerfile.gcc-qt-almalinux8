@@ -1,0 +1,170 @@
+ARG GCC_VERSION=15.1.0
+FROM gcc-almalinux8:gcc${GCC_VERSION} AS builder
+
+ARG GCC_VERSION=15.1.0
+ARG QT_VERSION=6.10.0
+ARG QT_VERSION_SHORT=6.10
+
+LABEL maintainer="esil0x@gmail.com"
+WORKDIR /data
+
+RUN dnf install -y dnf-plugins-core && \
+    dnf config-manager --set-enabled powertools && \
+    dnf install -y epel-release && \
+    dnf makecache && \
+    dnf install -y \
+        wget \
+        curl \
+        which \
+        tar \
+        bzip2 \
+        zlib-devel \
+        xz \
+        libxkbcommon-devel \
+        libxkbcommon-x11-devel \
+        libxkbcommon-x11-devel \
+        libX11-devel \
+        libxcb \
+        libxcb-devel \
+        xorg-x11-server-Xvfb \
+        xcb-util \
+        xcb-util-cursor \
+        xcb-util-wm \
+        xcb-util-devel \
+        xcb-util-*-devel \
+        mesa-libGL-devel \
+        mesa-libEGL-devel \
+        libXi-devel \
+        libXrender-devel \
+        libdrm-devel \
+        openssl3-devel \
+        fontconfig-devel \
+        freetype-devel \
+        glibc-langpack-en \
+        gperf \
+        bison \
+        flex \
+        && dnf clean all
+
+# Set Qt version
+ENV QT_VERSION_SHORT=${QT_VERSION_SHORT}
+ENV QT_VERSION=${QT_VERSION}
+ENV QT_INSTALL_DIR=/opt/Qt/${QT_VERSION}/gcc_64
+ENV QT_SRC_DIR=/data/qt
+ENV PATH="${QT_INSTALL_DIR}/bin:$PATH"
+
+# Create directory for Qt sources
+WORKDIR ${QT_SRC_DIR}
+
+# Download Qt base and SVG modules
+RUN wget https://download.qt.io/official_releases/qt/${QT_VERSION_SHORT}/${QT_VERSION}/submodules/qtbase-everywhere-src-${QT_VERSION}.tar.xz && \
+    wget https://download.qt.io/official_releases/qt/${QT_VERSION_SHORT}/${QT_VERSION}/submodules/qtsvg-everywhere-src-${QT_VERSION}.tar.xz && \
+    tar -xf qtbase-everywhere-src-${QT_VERSION}.tar.xz && \
+    tar -xf qtsvg-everywhere-src-${QT_VERSION}.tar.xz
+
+# Build QtBase
+WORKDIR /data/qt/qtbase-build
+
+ENV CC=/opt/gcc-15.1.0/bin/gcc
+ENV CXX=/opt/gcc-15.1.0/bin/g++
+RUN cmake ${QT_SRC_DIR}/qtbase-everywhere-src-${QT_VERSION} \
+    -G "Ninja" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=${QT_INSTALL_DIR} \
+    -DFEATURE_static=ON \
+    -DFEATURE_shared=OFF \
+    -DFEATURE_openssl=ON \
+    -DFEATURE_openssl_runtime=ON \
+    -DOPENSSL_INCLUDE_DIR=/usr/include/openssl3 \
+    -DOPENSSL_SSL_LIBRARY=/usr/lib64/openssl3/libssl.so \
+    -DOPENSSL_CRYPTO_LIBRARY=/usr/lib64/openssl3/libcrypto.so \
+    -DFEATURE_optimize_full=ON \
+    -DFEATURE_xcb=ON \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DFEATURE_system_zlib=ON \
+    -DCMAKE_C_FLAGS="-fPIC" \
+    -DCMAKE_CXX_FLAGS="-fPIC" && \
+    ninja -j$(nproc) && \
+    ninja install
+
+
+# Build QtSvg
+WORKDIR /data/qt/qtsvg-build
+RUN cmake ${QT_SRC_DIR}/qtsvg-everywhere-src-${QT_VERSION} \
+    -G "Ninja" \
+    -DCMAKE_PREFIX_PATH=${QT_INSTALL_DIR} \
+    -DCMAKE_INSTALL_PREFIX=${QT_INSTALL_DIR} \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DFEATURE_static=ON \
+    -DFEATURE_shared=OFF \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DCMAKE_C_FLAGS="-fPIC" \
+    -DCMAKE_CXX_FLAGS="-fPIC" && \
+    ninja -j$(nproc) && \
+    ninja install
+
+WORKDIR /data
+
+# Stage 2: minimal build image
+
+FROM gcc-almalinux8:gcc${GCC_VERSION}
+
+ARG GCC_VERSION=15.1.0
+ARG QT_VERSION=6.10.0
+ARG QT_VERSION_SHORT=6.10
+
+RUN dnf install -y dnf-plugins-core && \
+    dnf config-manager --set-enabled powertools && \
+    dnf install -y epel-release && \
+    dnf makecache && \
+    dnf install -y \
+        wget \
+        curl \
+        which \
+        tar \
+        bzip2 \
+        zlib-devel \
+        xz \
+        libxkbcommon-devel \
+        libxkbcommon-x11-devel \
+        libxkbcommon-x11-devel \
+        libX11-devel \
+        libxcb \
+        libxcb-devel \
+        xorg-x11-server-Xvfb \
+        xcb-util \
+        xcb-util-cursor \
+        xcb-util-wm \
+        xcb-util-devel \
+        xcb-util-*-devel \
+        mesa-libGL-devel \
+        mesa-libEGL-devel \
+        libXi-devel \
+        libXrender-devel \
+        libdrm-devel \
+        openssl3-devel \
+        fontconfig-devel \
+        freetype-devel \
+        glibc-langpack-en \
+        gperf \
+        bison \
+        flex \
+        && dnf clean all
+
+# Re-export Qt-related environment variables
+ENV QT_VERSION_SHORT=${QT_VERSION_SHORT}
+ENV QT_VERSION=${QT_VERSION}
+ENV QT_INSTALL_DIR=/opt/Qt/${QT_VERSION}/gcc_64
+ENV PATH="${QT_INSTALL_DIR}/bin:$PATH"
+
+ENV CC=/opt/gcc-${GCC_VERSION}/bin/gcc
+ENV CXX=/opt/gcc-${GCC_VERSION}/bin/g++
+
+# Copy Qt installed from builder stage
+COPY --from=builder ${QT_INSTALL_DIR} ${QT_INSTALL_DIR}
+
+# Keep a default working directory
+WORKDIR /data
+
+# Default command: bash shell
+CMD ["/bin/bash"]

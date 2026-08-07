@@ -1,0 +1,77 @@
+name: Build Linux packages
+
+# Runs on pushes to any branch or tag in this repository. Deliberately
+# has no `pull_request` trigger: a PR from a fork must not be able to
+# run this job, since it executes `docker build`/`docker run` with
+# access to the self-hosted runner.
+on:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "**"
+
+env:
+  GCC_VERSION: 15.1.0
+  QT_VERSION: 6.10.0
+  LC_ALL: C.UTF-8
+  LANG: C.UTF-8
+  BUILD_CPUS: 4
+
+jobs:
+  build-linux-packages:
+    name: Build Linux packages
+    # Second guard alongside the trigger above: even if this workflow
+    # somehow runs in a fork's context, refuse to execute.
+    if: github.repository == 'cxxdbg/cxxdbg'
+    runs-on: [self-hosted, Linux]
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build base build image
+        run: |
+          docker build \
+            --cpuset-cpus="0-$((BUILD_CPUS - 1))" \
+            -f build/docker/Dockerfile.gcc-almalinux8 \
+            --build-arg GCC_VERSION="${GCC_VERSION}" \
+            -t "gcc-almalinux8:gcc${GCC_VERSION}" \
+            build/docker
+
+      - name: Build Qt build image
+        run: |
+          docker build \
+            --cpuset-cpus="0-$((BUILD_CPUS - 1))" \
+            -f build/docker/Dockerfile.gcc-qt-almalinux8 \
+            --build-arg GCC_VERSION="${GCC_VERSION}" \
+            --build-arg QT_VERSION="${QT_VERSION}" \
+            -t "gcc-qt-almalinux8:gcc${GCC_VERSION}-qt${QT_VERSION}" \
+            build/docker
+
+      - name: Build packages
+        run: |
+          mkdir -p "${{ github.workspace }}/ci-build"
+          docker run --rm \
+            --cpuset-cpus="0-$((BUILD_CPUS - 1))" \
+            -v "${{ github.workspace }}:/data/src/cxxdbg" \
+            -v "${{ github.workspace }}/ci-build:/data/build" \
+            "gcc-qt-almalinux8:gcc${GCC_VERSION}-qt${QT_VERSION}" \
+            sh -c "cd /data/build && \
+                   cmake -G Ninja ../src/cxxdbg \
+                         -DCMAKE_BUILD_TYPE=Release \
+                         -DCXXDBG_DEPLOYMENT_TYPE=Release && \
+                   cmake --build . && \
+                   cpack"
+
+      - name: Publish packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: cxxdbg-linux-packages
+          path: |
+            ci-build/packages/*.deb
+            ci-build/packages/*.rpm
+            ci-build/packages/*.tar.bz2
+          if-no-files-found: error

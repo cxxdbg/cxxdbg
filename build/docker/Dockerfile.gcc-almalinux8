@@ -1,0 +1,156 @@
+FROM almalinux:8 AS builder
+
+LABEL maintainer="esil0x@gmail.com"
+WORKDIR /data
+
+ARG CMAKE_VERSION=3.31.8
+ARG NINJA_VERSION=1.12.1
+ARG GCC_VERSION=15.1.0
+ARG DPKG_VERSION=1.19.7
+ARG CMAKE_VERSION_SHORT=3.31
+
+# Install dependencies
+RUN dnf install -y \
+        wget \
+        tar \
+        curl \
+        gcc \
+        gcc-c++ \
+        make \
+        gmp-devel \
+        mpfr-devel \
+        libmpc-devel \
+        zlib-devel \
+        glibc-devel \
+        libstdc++-devel \
+        which \
+        unzip \
+        bzip2 \
+        diffutils \
+        rpm-build \
+        perl-version \
+        perl-Time-Piece \
+        patch \
+        ncurses-devel \
+        file \
+        git \
+        && dnf clean all
+
+
+# Install CMake
+ENV CMAKE_VERSION=${CMAKE_VERSION}
+ENV CMAKE_VERSION_SHORT=${CMAKE_VERSION_SHORT}
+
+RUN cd /opt && \
+    wget https://cmake.org/files/v${CMAKE_VERSION%.*}/cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz && \
+    tar -xzf cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz && \
+    ln -s /opt/cmake-${CMAKE_VERSION}-linux-x86_64/bin/cmake /usr/local/bin/cmake && \
+    ln -s /opt/cmake-${CMAKE_VERSION}-linux-x86_64/bin/cpack /usr/local/bin/cpack && \
+    rm -f cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz
+
+WORKDIR /data
+
+ENV PATH="/opt/cmake-${CMAKE_VERSION}/bin:$PATH"
+
+
+# Download and install ninja
+ENV NINJA_VERSION=${NINJA_VERSION}
+RUN wget https://github.com/ninja-build/ninja/releases/download/v${NINJA_VERSION}/ninja-linux.zip \
+ && unzip ninja-linux.zip -d /usr/local/bin \
+ && chmod +x /usr/local/bin/ninja \
+ && rm ninja-linux.zip
+
+
+# Download and build GCC 15
+ENV GCC_VERSION=${GCC_VERSION}
+WORKDIR /data/gcc
+RUN curl -LO https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz && \
+    tar -xf gcc-${GCC_VERSION}.tar.xz && \
+    mkdir gcc-${GCC_VERSION}-build && \
+    cd gcc-${GCC_VERSION} && \
+    ./contrib/download_prerequisites && \
+    cd ../gcc-${GCC_VERSION}-build && \
+    ../gcc-${GCC_VERSION}/configure --disable-multilib --enable-languages=c,c++ --prefix=/opt/gcc-${GCC_VERSION} && \
+    make -j$(nproc) && \
+    make install
+
+# Remove build files
+WORKDIR /data
+RUN rm -Rf gcc
+
+
+# Set GCC 15 as default
+ENV PATH="/opt/gcc-${GCC_VERSION}/bin:$PATH"
+ENV LD_LIBRARY_PATH="/opt/gcc-${GCC_VERSION}/lib64:$LD_LIBRARY_PATH"
+ENV CC="/opt/gcc-${GCC_VERSION}/bin/gcc"
+ENV CXX="/opt/gcc-${GCC_VERSION}/bin/g++"
+
+
+# Download, build, and install dpkg from source
+ENV DPKG_VERSION=${DPKG_VERSION}
+ENV DPKG_URL=https://snapshot.debian.org/archive/debian/20190902T153040Z/pool/main/d/dpkg/dpkg_${DPKG_VERSION}.tar.xz
+ENV CC=/usr/bin/gcc
+ENV CXX=/usr/bin/g++
+RUN wget ${DPKG_URL} && \
+    tar -xf dpkg_${DPKG_VERSION}.tar.xz && \
+    cd dpkg-${DPKG_VERSION} && \
+    ./configure --prefix=/usr/local && \
+    make -j$(nproc) && \
+    make install && \
+    cd .. && \
+    rm -rf dpkg-${DPKG_VERSION} dpkg_${DPKG_VERSION}.tar.xz
+
+
+# Set default working directory
+WORKDIR /data
+
+# Final image
+FROM almalinux:8
+
+ARG CMAKE_VERSION=3.31.8
+ARG NINJA_VERSION=1.12.1
+ARG GCC_VERSION=15.1.0
+ARG DPKG_VERSION=1.19.7
+
+# Install dependencies
+RUN dnf install -y \
+        wget \
+        tar \
+        curl \
+        gcc \
+        gcc-c++ \
+        make \
+        gmp-devel \
+        mpfr-devel \
+        libmpc-devel \
+        zlib-devel \
+        glibc-devel \
+        libstdc++-devel \
+        which \
+        unzip \
+        bzip2 \
+        diffutils \
+        rpm-build \
+        perl-version \
+        perl-Time-Piece \
+        patch \
+        ncurses-devel \
+        file \
+        git \
+        && dnf clean all
+
+ENV NINJA_VERSION=${NINJA_VERSION}
+ENV CMAKE_VERSION=${CMAKE_VERSION}
+ENV GCC_VERSION=${GCC_VERSION}
+ENV PATH="/opt/cmake-${CMAKE_VERSION}-linux-x86_64/bin:/opt/gcc-$GCC_VERSION/bin:$PATH"
+ENV LD_LIBRARY_PATH="/opt/gcc-${GCC_VERSION}/lib64:$LD_LIBRARY_PATH"
+ENV CC="/opt/gcc-${GCC_VERSION}/bin/gcc"
+ENV CXX="/opt/gcc-${GCC_VERSION}/bin/g++"
+
+# Copy build result from the builder image
+COPY --from=builder /opt /opt
+COPY --from=builder /usr/local/bin/ninja /usr/local/bin/ninja
+
+WORKDIR /data
+
+CMD ["/bin/bash"]
