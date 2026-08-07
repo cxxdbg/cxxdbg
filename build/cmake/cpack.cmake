@@ -42,4 +42,15 @@ set(CPACK_PACKAGE_HOMEPAGE_URL "https://cxxdbg.org")
 set(CPACK_PACKAGE_CONTACT "support@cxxdbg.org")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "cxxdbg")
 
+# CPack's DEB generator normally auto-detects this via `dpkg
+# --print-architecture`, but that can be unavailable in minimal build
+# images, silently producing a package with an empty Architecture field.
+if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "^(x86_64|amd64)$")
+    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
+elseif("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "^(aarch64|arm64)$")
+    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "arm64")
+else()
+    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${CMAKE_SYSTEM_PROCESSOR}")
+endif()
+
 include(CPack)
