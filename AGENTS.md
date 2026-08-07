@@ -158,3 +158,28 @@ into their own repositories, vendored under `libs/` and added via
   comparisons, even where CMake would tolerate the bare form.
 - Split multi-condition `if(...)` expressions across multiple lines, one
   condition per line, instead of one long line.
+
+## Include order
+
+`#include` directives are grouped into the following categories, in
+this order:
+
+1. Includes from the current directory/module.
+2. Includes from subdirectories of the current module.
+3. Includes from other directories/modules in this project.
+4. Third-party library includes.
+5. System includes.
+
+Includes are not separated by blank lines, except:
+
+- A blank line goes before a category's includes when that category has
+  more than 5 includes, to visually set off the large group.
+- A blank line always goes before an `#ifdef`/`#if` block of includes
+  (e.g. platform-specific includes).
+
+For example, in `cxxdbg/app/version.hpp`:
+
+```cpp
+#include "version_config.hpp"
+#include <string>
+```
