@@ -43,10 +43,10 @@ endif()
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
     set_property(TARGET cxxdbg-dap-server PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                "${CMAKE_CURRENT_BINARY_DIR}/../../../cxxdbg.app/Contents/bin")
+                "${CMAKE_CURRENT_BINARY_DIR}/../../../CxxDbg.app/Contents/bin")
 endif()
 
-# dap server will be installed together with cxxdbg.app bundle
+# dap server will be installed together with CxxDbg.app bundle
 if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
     install(TARGETS cxxdbg-dap-server RUNTIME DESTINATION "bin" COMPONENT "cxxdbg")
 endif()

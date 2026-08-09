@@ -236,6 +236,7 @@ set_property(TARGET cxxdbg PROPERTY MACOSX_BUNDLE_ICON_FILE "icon.icns")
 set_property(TARGET cxxdbg PROPERTY MACOSX_BUNDLE_GUI_IDENTIFIER "org.cxxdbg.cxxdbg")
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+    set_property(TARGET cxxdbg PROPERTY OUTPUT_NAME "CxxDbg")
     set_property(TARGET cxxdbg PROPERTY RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../..")
 endif()
 
@@ -302,9 +303,9 @@ endif()
 ############################################################
 # INSTAL
 
-# install anything inside cxxdbg.app bundle on macos
+# install anything inside CxxDbg.app bundle on macos
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
-    set(inst_prefix "cxxdbg.app/Contents/")
+    set(inst_prefix "CxxDbg.app/Contents/")
 else()
     set(inst_prefix)
 endif()

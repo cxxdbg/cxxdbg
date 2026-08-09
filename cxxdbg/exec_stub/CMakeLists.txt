@@ -45,7 +45,7 @@ endif()
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
     set_property(TARGET cxxdbg-exec-stub PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                    "${CMAKE_CURRENT_BINARY_DIR}/../../cxxdbg.app/Contents/bin")
+                    "${CMAKE_CURRENT_BINARY_DIR}/../../CxxDbg.app/Contents/bin")
 endif()
 
 # linking with util and license library
@@ -54,7 +54,7 @@ target_link_libraries(cxxdbg-exec-stub cxxdbg-dbg-execstub cxxdbg-util cxxdbg-lo
 # linking with boost program options
 target_link_libraries(cxxdbg-exec-stub Boost::program_options)
 
-# cxxdbg-exec-stub will be installed together with cxxdbg.app bundle
+# cxxdbg-exec-stub will be installed together with CxxDbg.app bundle
 if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
     install(TARGETS cxxdbg-exec-stub
             RUNTIME DESTINATION "bin"

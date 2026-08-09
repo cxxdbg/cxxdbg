@@ -68,7 +68,7 @@ endforeach()
 set(share_subdir "share/cxxdbg/images")
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
-    set(dest_dir "${CMAKE_CURRENT_BINARY_DIR}/../../cxxdbg.app/Contents/${share_subdir}")
+    set(dest_dir "${CMAKE_CURRENT_BINARY_DIR}/../../CxxDbg.app/Contents/${share_subdir}")
 else()
     set(dest_dir "${CMAKE_CURRENT_BINARY_DIR}/../../${share_subdir}")
 endif()
@@ -93,7 +93,7 @@ endforeach()
 # copy icon into Resources folder for Macos
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
     set(input "${CMAKE_CURRENT_SOURCE_DIR}/icon.icns")
-    set(output "${CMAKE_CURRENT_BINARY_DIR}/../../cxxdbg.app/Contents/Resources/icon.icns")
+    set(output "${CMAKE_CURRENT_BINARY_DIR}/../../CxxDbg.app/Contents/Resources/icon.icns")
 
     add_custom_command(OUTPUT "${output}"
                        COMMAND "${CMAKE_COMMAND}" -E copy "${input}" "${output}"
