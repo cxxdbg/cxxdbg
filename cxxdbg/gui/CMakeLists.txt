@@ -245,13 +245,18 @@ find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
 
 set(sign_cmd)
 if(NOT "${LLDB_CODESIGN_IDENTITY}" STREQUAL "")
-    set(debugserver_entitlements "${CMAKE_CURRENT_SOURCE_DIR}/../../llvm-project/lldb/resources/debugserver-macosx-entitlements.plist")
+    set(debugserver_entitlements "${CMAKE_CURRENT_SOURCE_DIR}/../../llvm-project/lldb/tools/debugserver/resources/debugserver-macosx-entitlements.plist")
     set(exec_stub_entitlements "${CMAKE_CURRENT_SOURCE_DIR}/../exec_stub/entitlements.plist")
     set(sign_cmd
         COMMAND "/usr/bin/codesign" "--options=runtime" "-s" "${LLDB_CODESIGN_IDENTITY}" "--deep" "--force" "$<TARGET_FILE_DIR:cxxdbg>/../../Contents/bin/cxxdbg-dap-server"
         COMMAND "/usr/bin/codesign" "--options=runtime" "-s" "${LLDB_CODESIGN_IDENTITY}" "--deep" "--force" "--entitlements=${exec_stub_entitlements}" "$<TARGET_FILE_DIR:cxxdbg>/../../Contents/bin/cxxdbg-exec-stub"
         COMMAND "/usr/bin/codesign" "--options=runtime" "-s" "${LLDB_CODESIGN_IDENTITY}" "--deep" "--force" "--entitlements=${debugserver_entitlements}" "$<TARGET_FILE_DIR:cxxdbg>/../../Contents/bin/debugserver"
         COMMAND "/usr/bin/codesign" "--options=runtime" "-s" "${LLDB_CODESIGN_IDENTITY}" "--deep" "--force" "$<TARGET_FILE_DIR:cxxdbg>/../..")
+else()
+    # No codesign identity configured: remove the signature from all libraries
+    # in the bundle instead.
+    set(sign_cmd
+        COMMAND "/usr/bin/codesign" "--force" "--deep" "-s" "-" "$<TARGET_FILE_DIR:cxxdbg>/../..")
 endif()
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")

@@ -53,4 +53,11 @@ else()
     set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${CMAKE_SYSTEM_PROCESSOR}")
 endif()
 
+# Post-build action for signing .dmg
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin"
+   AND NOT "${LLDB_CODESIGN_IDENTITY}" STREQUAL "")
+    set(CPACK_CXXDBG_CODESIGN_IDENTITY "${LLDB_CODESIGN_IDENTITY}")
+    set(CPACK_POST_BUILD_SCRIPTS "${CMAKE_CURRENT_LIST_DIR}/codesign_dmg.cmake")
+endif()
+
 include(CPack)
