@@ -1,5 +1,5 @@
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.20)
 
 # Selecting default toolchain and settings depending on platform
 include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/toolchain.cmake")
