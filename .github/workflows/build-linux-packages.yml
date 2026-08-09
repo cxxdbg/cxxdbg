@@ -56,6 +56,8 @@ jobs:
           mkdir -p "${{ github.workspace }}/ci-build"
           docker run --rm \
             --cpuset-cpus="0-$((BUILD_CPUS - 1))" \
+            --user "$(id -u):$(id -g)" \
+            -e HOME=/tmp \
             -v "${{ github.workspace }}:/data/src/cxxdbg" \
             -v "${{ github.workspace }}/ci-build:/data/build" \
             "gcc-qt-almalinux8:gcc${GCC_VERSION}-qt${QT_VERSION}" \
