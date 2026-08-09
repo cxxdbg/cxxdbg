@@ -1,0 +1,165 @@
+name: Build packages
+
+# Runs on pushes to any branch or tag in this repository. Deliberately
+# has no `pull_request` trigger: a PR from a fork must not be able to
+# run this job, since it executes `docker build`/`docker run` with
+# access to the self-hosted runner.
+on:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "**"
+
+env:
+  GCC_VERSION: 15.1.0
+  QT_VERSION: 6.11.1
+  LC_ALL: C.UTF-8
+  LANG: C.UTF-8
+  BUILD_CPUS: 4
+
+jobs:
+  build-linux-packages:
+    name: Build Linux packages
+    # Second guard alongside the trigger above: even if this workflow
+    # somehow runs in a fork's context, refuse to execute.
+    if: github.repository == 'cxxdbg/cxxdbg'
+    runs-on: [self-hosted, Linux]
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build base build image
+        run: |
+          docker build \
+            --cpuset-cpus="0-$((BUILD_CPUS - 1))" \
+            -f build/docker/Dockerfile.gcc-almalinux8 \
+            --build-arg GCC_VERSION="${GCC_VERSION}" \
+            -t "gcc-almalinux8:gcc${GCC_VERSION}" \
+            build/docker
+
+      - name: Build Qt build image
+        run: |
+          docker build \
+            --cpuset-cpus="0-$((BUILD_CPUS - 1))" \
+            -f build/docker/Dockerfile.gcc-qt-almalinux8 \
+            --build-arg GCC_VERSION="${GCC_VERSION}" \
+            --build-arg QT_VERSION="${QT_VERSION}" \
+            --build-arg QT_VERSION_SHORT="${QT_VERSION%.*}" \
+            -t "gcc-qt-almalinux8:gcc${GCC_VERSION}-qt${QT_VERSION}" \
+            build/docker
+
+      - name: Build packages
+        run: |
+          mkdir -p "${{ github.workspace }}/ci-build"
+          docker run --rm \
+            --cpuset-cpus="0-$((BUILD_CPUS - 1))" \
+            --user "$(id -u):$(id -g)" \
+            -e HOME=/tmp \
+            -v "${{ github.workspace }}:/data/src/cxxdbg" \
+            -v "${{ github.workspace }}/ci-build:/data/build" \
+            "gcc-qt-almalinux8:gcc${GCC_VERSION}-qt${QT_VERSION}" \
+            sh -c "cd /data/build && \
+                   cmake -G Ninja ../src/cxxdbg \
+                         -DCMAKE_BUILD_TYPE=Release \
+                         -DCXXDBG_DEPLOYMENT_TYPE=Release && \
+                   cmake --build . && \
+                   cpack"
+
+      - name: Publish packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: cxxdbg-linux-packages
+          path: |
+            ci-build/packages/*.deb
+            ci-build/packages/*.rpm
+            ci-build/packages/*.tar.bz2
+          if-no-files-found: error
+
+  build-macos-packages:
+    name: Build macOS packages
+    # Second guard alongside the trigger above: even if this workflow
+    # somehow runs in a fork's context, refuse to execute.
+    if: github.repository == 'cxxdbg/cxxdbg'
+    runs-on: [self-hosted, macOS]
+    env:
+      DEVELOPER_DIR: /Applications/Xcode-26.1.app/Contents/Developer
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Import signing certificate
+        run: |
+          KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain"
+          KEYCHAIN_PASSWORD="$(openssl rand -hex 16)"
+          echo "KEYCHAIN_PATH=${KEYCHAIN_PATH}" >> "$GITHUB_ENV"
+          echo "KEYCHAIN_PASSWORD=${KEYCHAIN_PASSWORD}" >> "$GITHUB_ENV"
+
+          security create-keychain -p "${KEYCHAIN_PASSWORD}" "${KEYCHAIN_PATH}"
+          security set-keychain-settings -lut 21600 "${KEYCHAIN_PATH}"
+          security unlock-keychain -p "${KEYCHAIN_PASSWORD}" "${KEYCHAIN_PATH}"
+
+          echo "${{ secrets.CXXDBG_SIGNING_CERTIFICATE }}" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security import "$RUNNER_TEMP/cert.p12" \
+            -k "${KEYCHAIN_PATH}" \
+            -P "${{ secrets.CXXDBG_SIGNING_CERTIFICATE_PASSWORD }}" \
+            -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s \
+            -k "${KEYCHAIN_PASSWORD}" "${KEYCHAIN_PATH}"
+          security list-keychains -d user -s "${KEYCHAIN_PATH}"
+
+      - name: Configure
+        env:
+          CXXDBG_CODESIGN_IDENTITY: ${{ secrets.CXXDBG_CODESIGN_IDENTITY }}
+        run: |
+          mkdir -p "${{ github.workspace }}/ci-build"
+          cd "${{ github.workspace }}/ci-build"
+
+          escaped_identity=$(printf '%s' "${CXXDBG_CODESIGN_IDENTITY}" | sed -e 's/(/\\(/g' -e 's/)/\\)/g')
+
+          cmake -G Ninja .. \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DCXXDBG_DEPLOYMENT_TYPE=Release \
+                -DCMAKE_PREFIX_PATH="/opt/Qt-opensource/${QT_VERSION}/macos" \
+                -DCMAKE_OSX_SYSROOT="$(xcrun --sdk macosx --show-sdk-path)" \
+                -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" \
+                -DCMAKE_OSX_DEPLOYMENT_TARGET=13.3 \
+                -DLLDB_CODESIGN_IDENTITY="${escaped_identity}"
+
+      - name: Build
+        run: cmake --build ci-build
+
+      - name: Package
+        working-directory: ci-build
+        run: cpack
+
+      - name: Notarize
+        working-directory: ci-build
+        env:
+          CXXDBG_NOTARIZATION_APPLE_ID: ${{ secrets.CXXDBG_NOTARIZATION_APPLE_ID }}
+          CXXDBG_NOTARIZATION_TEAM_ID: ${{ secrets.CXXDBG_NOTARIZATION_TEAM_ID }}
+          CXXDBG_NOTARIZATION_PASSWORD: ${{ secrets.CXXDBG_NOTARIZATION_PASSWORD }}
+        run: |
+          xcrun notarytool submit packages/cxxdbg-*-macos.dmg --wait \
+            --apple-id "${CXXDBG_NOTARIZATION_APPLE_ID}" \
+            --team-id "${CXXDBG_NOTARIZATION_TEAM_ID}" \
+            --password "${CXXDBG_NOTARIZATION_PASSWORD}"
+
+      - name: Staple
+        working-directory: ci-build
+        run: xcrun stapler staple packages/cxxdbg-*-macos.dmg
+
+      - name: Publish packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: cxxdbg-macos-packages
+          path: |
+            ci-build/packages/*.dmg
+            ci-build/packages/*.zip
+          if-no-files-found: error
