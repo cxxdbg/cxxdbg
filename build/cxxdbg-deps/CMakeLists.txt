@@ -146,6 +146,7 @@ if("${CXXDBG_BUILD_BOOST}")
                                                 Boost::iterator
                                                 Boost::signals2
                                                 Boost::dll
-                                                Boost::process)
+                                                Boost::process
+                                                Boost::included_unit_test_framework)
     add_library(Boost::boost ALIAS Boost_boost)
 endif()
