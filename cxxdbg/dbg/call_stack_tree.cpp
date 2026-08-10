@@ -15,6 +15,7 @@
 #include "stack_frame.hpp"
 #include "cxxdbg/util/convert.hpp"
 #include <ranges.hpp>
+#include <sstream>
 
 
 #define DEBUG_CALL_STACK_TREE
