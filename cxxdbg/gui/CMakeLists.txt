@@ -167,7 +167,7 @@ set(cxxdbg_gui_sources
 set(cxxdbg_additional_sources)
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-    list(APPEND cxxdbg_additional_sources "${CMAKE_CURRENT_SOURCE_DIR}/../../resources/images/icon.rc")
+    add_library(cxxdbg-icon OBJECT "${CMAKE_CURRENT_SOURCE_DIR}/../../resources/images/icon.rc")
 endif()
 
 if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin"
@@ -217,6 +217,10 @@ add_executable(cxxdbg MACOSX_BUNDLE
 
 target_precompile_headers(cxxdbg PRIVATE pch_cxxdbg.hpp)
 
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+    target_sources(cxxdbg PRIVATE $<TARGET_OBJECTS:cxxdbg-icon>)
+endif()
+
 target_link_libraries(cxxdbg PRIVATE tmvc-qt cxxdbg-app cxxdbg-dbg-appcore)
 target_link_libraries(cxxdbg PRIVATE ${qt_name}::Widgets)
 target_link_libraries(cxxdbg PRIVATE ${qt_name}::Svg)
@@ -243,6 +247,7 @@ endif()
 get_target_property(_qmake_executable ${qt_name}::qmake IMPORTED_LOCATION)
 get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
 find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
+find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
 
 set(sign_cmd)
 if(NOT "${LLDB_CODESIGN_IDENTITY}" STREQUAL "")
@@ -333,6 +338,7 @@ install(TARGETS cxxdbg
 
 # Installing Qt libraries
 if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin"
+   AND NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows"
    AND NOT "${CXXDBG_QT_IS_STATIC}"
    AND NOT "${CXXDBG_QT_IS_SYSTEM}")
     set(qt_libs "Widgets" "Gui" "Core" "DBus" "Svg")
@@ -438,14 +444,21 @@ if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin"
     COMPONENT cxxdbg)
 endif()
 
-# installing mingw libraries on Windows
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-    SET(CMAKE_FIND_LIBRARY_SUFFIXES ".dll")
-    find_library(gcc_lib gcc_s_seh-1)
-    find_library(stdcxx_lib stdc++-6)
-    find_library(pthread_lib winpthread-1)
+    install(CODE "
+        execute_process(COMMAND \"${WINDEPLOYQT_EXECUTABLE}\"
+                                 \"\${CMAKE_INSTALL_PREFIX}/bin/$<TARGET_FILE_NAME:cxxdbg>\"
+                                 --libdir \"\${CMAKE_INSTALL_PREFIX}/bin\"
+                                 --plugindir \"\${CMAKE_INSTALL_PREFIX}/${lib_dir}/plugins\"
+                                 --no-translations)
+    " COMPONENT cxxdbg)
 
-    install(FILES "${gcc_lib}" "${stdcxx_lib}" "${pthread_lib}" DESTINATION "bin" COMPONENT cxxdbg)
+    get_filename_component(mingw_bin_dir "${CMAKE_CXX_COMPILER}" DIRECTORY)
+    install(FILES "${mingw_bin_dir}/libgcc_s_seh-1.dll"
+                  "${mingw_bin_dir}/libstdc++-6.dll"
+                  "${mingw_bin_dir}/libwinpthread-1.dll"
+            DESTINATION "bin"
+            COMPONENT cxxdbg)
 endif()
 
 add_dependencies(install-cxxdbg cxxdbg)
