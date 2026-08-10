@@ -57,15 +57,19 @@ set(boost_libraries
     chrono
     atomic
     iostreams
-    unit_test_framework
-    dll)
+    unit_test_framework)
+
+# Only mingw64's Boost package ships a boost_dll CMake config
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+    list(APPEND boost_libraries dll)
+endif()
 
 find_package(Boost 1.74 REQUIRED COMPONENTS ${boost_libraries})
 
-# Boost.Process, Boost.Interprocess and Boost.System are header-only and have
-# no compiled component, so the system BoostConfig.cmake doesn't provide
-# Boost:: targets for them (unlike the FetchContent-built Boost, which
-# creates one per module).
+# Boost.Process, Boost.Interprocess, Boost.System and (outside Windows)
+# Boost.DLL are header-only and have no compiled component, so the system
+# BoostConfig.cmake doesn't provide Boost:: targets for them (unlike the
+# FetchContent-built Boost, which creates one per module).
 if(NOT TARGET Boost::process)
     add_library(Boost::process ALIAS Boost::headers)
 endif()
@@ -74,6 +78,9 @@ if(NOT TARGET Boost::interprocess)
 endif()
 if(NOT TARGET Boost::system)
     add_library(Boost::system ALIAS Boost::headers)
+endif()
+if(NOT TARGET Boost::dll)
+    add_library(Boost::dll ALIAS Boost::headers)
 endif()
 
 # We use the Boost.Process v1 API (unqualified boost::process::child/args/...).

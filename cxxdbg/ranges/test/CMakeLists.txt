@@ -11,7 +11,7 @@ add_executable(rangestest
                join_delim_test.cpp
                test.cpp)
 
-target_link_libraries(rangestest PRIVATE ranges)
+target_link_libraries(rangestest PRIVATE ranges Boost::boost)
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     target_link_libraries(rangestest PRIVATE rt)
