@@ -12,7 +12,7 @@ add_executable(asynctest
                test.cpp
               )
 
-target_link_libraries(asynctest PRIVATE cxxdbg-async Boost::unit_test_framework)
+target_link_libraries(asynctest PRIVATE cxxdbg-async)
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     target_link_libraries(asynctest PRIVATE rt)

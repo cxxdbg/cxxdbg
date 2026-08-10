@@ -13,7 +13,7 @@ add_executable(dbgcoretest
                test.cpp
               )
 
-target_link_libraries(dbgcoretest PRIVATE cxxdbg-dbg-core Boost::unit_test_framework)
+target_link_libraries(dbgcoretest PRIVATE cxxdbg-dbg-core)
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     target_link_libraries(dbgcoretest PRIVATE rt)

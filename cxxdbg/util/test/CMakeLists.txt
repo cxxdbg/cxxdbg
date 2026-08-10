@@ -14,7 +14,7 @@ add_executable(utiltest
                version_test.cpp
               )
 
-target_link_libraries(utiltest PRIVATE cxxdbg-util Boost::unit_test_framework)
+target_link_libraries(utiltest PRIVATE cxxdbg-util)
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     target_link_libraries(utiltest PRIVATE rt)

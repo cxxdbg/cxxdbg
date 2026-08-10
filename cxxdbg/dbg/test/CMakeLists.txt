@@ -29,7 +29,7 @@ add_executable(dbgtest
                breakpoints_model_test.cpp
                watchpoint_test.cpp)
 
-target_link_libraries(dbgtest PRIVATE cxxdbg-dbg cxxdbg-app cxxdbg-dbg-fmt Boost::unit_test_framework)
+target_link_libraries(dbgtest PRIVATE cxxdbg-dbg cxxdbg-app cxxdbg-dbg-fmt)
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     target_link_libraries(dbgtest PRIVATE rt)

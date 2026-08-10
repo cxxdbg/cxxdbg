@@ -20,7 +20,7 @@ else()
                                     bp_pty_launcher_test.cpp)
 endif()
 
-target_link_libraries(proctest PUBLIC cxxdbg-proc cxxdbg-async cxxdbg-util Boost::unit_test_framework)
+target_link_libraries(proctest PUBLIC cxxdbg-proc cxxdbg-async cxxdbg-util)
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     target_link_libraries(proctest PRIVATE rt)

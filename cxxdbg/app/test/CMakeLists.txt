@@ -19,7 +19,7 @@ add_executable(apptest
                vector_ptr_tree_model_test.cpp
                vector_ro_tree_view_model_test.cpp)
 
-target_link_libraries(apptest PRIVATE cxxdbg-app Boost::unit_test_framework)
+target_link_libraries(apptest PRIVATE cxxdbg-app)
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     target_link_libraries(apptest PRIVATE rt)

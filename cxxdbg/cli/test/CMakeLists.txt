@@ -33,7 +33,7 @@ add_executable(dbgclitest
                watch_group_test.cpp
               )
 
-target_link_libraries(dbgclitest PRIVATE cxxdbg-dbg-cli cxxdbg-async Boost::unit_test_framework)
+target_link_libraries(dbgclitest PRIVATE cxxdbg-dbg-cli cxxdbg-async)
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     target_link_libraries(dbgclitest PRIVATE rt)
