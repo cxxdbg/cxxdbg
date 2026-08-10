@@ -10,6 +10,10 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/common.cmake")
 
 option(CXXDBG_BUILD_LLDB "Build LLDB together with LLVM" ON)
 
+if(NOT "${CXXDBG_LLVM_ENABLE_SHARED}")
+    add_compile_definitions(LLDB_IN_LIBLLDB)
+endif()
+
 
 if(CXXDBG_USE_LLD)
     set(LLVM_USE_LINKER "lld")

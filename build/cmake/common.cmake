@@ -37,16 +37,13 @@ endif()
 
 # setting default option values depending on deployment type
 if("${CXXDBG_DEPLOYMENT_TYPE}" STREQUAL "Development")
-    set(CXXDBG_ENABLE_SHARED_DEFAULT ON)
-    set(CXXDBG_ENABLE_SYSTEM_SHARED_DEFAULT ON)
-
-    # shared libraries in LLVM should always be disabled for non-windows build
     if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-        set(CXXDBG_LLVM_ENABLE_SHARED_DEFAULT ON)
+        set(CXXDBG_ENABLE_SHARED_DEFAULT OFF)
     else()
-        set(CXXDBG_LLVM_ENABLE_SHARED_DEFAULT OFF)
+        set(CXXDBG_ENABLE_SHARED_DEFAULT ON)
     endif()
-
+    set(CXXDBG_ENABLE_SYSTEM_SHARED_DEFAULT ON)
+    set(CXXDBG_LLVM_ENABLE_SHARED_DEFAULT OFF)
     set(LLVM_ENABLE_SHARED_SYSLIBS_DEFAULT ON)
 else()
     set(CXXDBG_ENABLE_SHARED_DEFAULT OFF)

@@ -474,7 +474,7 @@ target_link_libraries(cxxdbg-llvm-libraries INTERFACE ZLIB::ZLIB)
 
 # linking with system libraries
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-    target_link_libraries(cxxdbg-llvm-libraries INTERFACE ws2_32 psapi rpcrt4 version dbghelp)
+    target_link_libraries(cxxdbg-llvm-libraries INTERFACE ws2_32 psapi rpcrt4 version dbghelp shell32 ole32 uuid advapi32 ntdll)
 else()
     target_link_libraries(cxxdbg-llvm-libraries INTERFACE dl -pthread)
 endif()
@@ -508,6 +508,12 @@ target_include_directories(llvm-includes INTERFACE
 # CIndex requires CINDEX_NO_EXPORTS definition for static builds on Windows
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows" AND NOT "${CXXDBG_LLVM_ENABLE_SHARED}")
     target_compile_definitions(llvm-includes INTERFACE "-DCINDEX_NO_EXPORTS=1")
+endif()
+
+# LLDB_API resolves to dllimport on Windows unless LLDB_IN_LIBLLDB is defined;
+# our LLDB fork applies it beyond liblldb itself, so define it for static builds
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows" AND NOT "${CXXDBG_LLVM_ENABLE_SHARED}")
+    target_compile_definitions(llvm-includes INTERFACE "-DLLDB_IN_LIBLLDB=1")
 endif()
 
 if("${LLDB_ROOT}" STREQUAL "${LLVM_ROOT}")

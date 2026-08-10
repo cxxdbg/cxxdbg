@@ -57,7 +57,8 @@ set(boost_libraries
     chrono
     atomic
     iostreams
-    unit_test_framework)
+    unit_test_framework
+    dll)
 
 find_package(Boost 1.74 REQUIRED COMPONENTS ${boost_libraries})
 
