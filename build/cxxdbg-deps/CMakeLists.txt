@@ -119,6 +119,12 @@ endif()
 # Boost
 if("${CXXDBG_BUILD_BOOST}")
     set(BOOST_SKIP_INSTALL_RULES OFF CACHE BOOL "Skip boost install")
+
+    # Disable ASM implementation in boost_context on Macos
+    if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+        set(BOOST_CONTEXT_IMPLEMENTATION "ucontext" CACHE STRING "boost context impl")
+    endif()
+
     FetchContent_Declare(
         Boost
         URL "https://github.com/boostorg/boost/releases/download/boost-1.85.0/boost-1.85.0-cmake.tar.gz"
