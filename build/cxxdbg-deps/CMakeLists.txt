@@ -56,6 +56,7 @@ if("${CXXDBG_BUILD_ZLIB}")
         OVERRIDE_FIND_PACKAGE
     )
     FetchContent_MakeAvailable(ZLIB)
+    add_library(ZLIB::ZLIB ALIAS zlib)
 endif()
 
 
@@ -105,7 +106,6 @@ endif()
 
 # Ncurses
 if("${CXXDBG_BUILD_NCURSES}")
-    set(BOOST_SKIP_INSTALL_RULES OFF CACHE BOOL "Skip boost install")
     FetchContent_Declare(
         Curses
         GIT_REPOSITORY "https://github.com/cxxdbg/ncurses.git"
@@ -118,7 +118,8 @@ endif()
 
 # Boost
 if("${CXXDBG_BUILD_BOOST}")
-    set(BOOST_SKIP_INSTALL_RULES OFF CACHE BOOL "Skip boost install")
+    set(BOOST_SKIP_INSTALL_RULES ON CACHE BOOL "Skip boost install")
+    set(CMAKE_CXX_STANDARD 20)
 
     # Disable ASM implementation in boost_context on Macos
     if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
