@@ -163,3 +163,38 @@ jobs:
             ci-build/packages/*.dmg
             ci-build/packages/*.zip
           if-no-files-found: error
+
+  build-windows-packages:
+    name: Build Windows packages
+    # Second guard alongside the trigger above: even if this workflow
+    # somehow runs in a fork's context, refuse to execute.
+    if: github.repository == 'cxxdbg/cxxdbg'
+    runs-on: [self-hosted, Windows]
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Configure
+        run: |
+          cmake -G Ninja -S "${{ github.workspace }}" -B "${{ github.workspace }}/ci-build" `
+                -DCMAKE_BUILD_TYPE=Release `
+                -DCXXDBG_DEPLOYMENT_TYPE=Release `
+                -DCMAKE_PREFIX_PATH="C:/Qt-opensource/$env:QT_VERSION/mingw_64"
+
+      - name: Build
+        run: cmake --build "${{ github.workspace }}/ci-build"
+
+      - name: Package
+        working-directory: ci-build
+        run: cpack
+
+      - name: Publish packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: cxxdbg-windows-packages
+          path: |
+            ci-build/packages/*.zip
+          if-no-files-found: error
