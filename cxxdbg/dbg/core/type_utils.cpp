@@ -114,6 +114,9 @@ clang::CXXRecordDecl * get_record_decl_for_type(lldb::SBType type) {
     if (!clang_type_system)
         return nullptr;
 
+    // force LLDB to load complete debug info for this type
+    compiler_type.GetCompleteType();
+
     // getting record decl
     auto oct = compiler_type.GetOpaqueQualType();
     return clang_type_system->GetAsCXXRecordDecl(oct);
