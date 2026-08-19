@@ -362,11 +362,6 @@ void breakpoint_list::connect_impl(breakpoint_list_impl * impl) {
     impl_ = impl;
     assert(impl_ != nullptr && "impl pointer should not be null");
 
-    // resetting real hit counters to zero for all breakpoints
-    for (auto bp : all()) {
-        bp->reset_real_curr_hit_count();
-    }
-
     // installing all code breakpoints into implementation
     for (auto bp : code_breakpoints()) {
         install_code_breakpoint_into_impl(bp);

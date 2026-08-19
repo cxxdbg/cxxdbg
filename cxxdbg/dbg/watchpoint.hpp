@@ -82,11 +82,6 @@ public:
     /// Updates watchpoint info
     bool update(const breakpoint_info * bpinf) override;
 
-protected:
-    /// Called before target executable starts. Resets both current hit count
-    /// and current real hit count in base class
-    void before_start() override;
-
 private:
     bool read_;
     bool write_;

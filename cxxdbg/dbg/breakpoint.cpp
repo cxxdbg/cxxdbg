@@ -10,7 +10,6 @@
 
 #include "breakpoint.hpp"
 #include "breakpoint_info.hpp"
-#include <cassert>
 #include <sstream>
 
 
@@ -55,16 +54,6 @@ void breakpoint::set_hit_count_enabled(bool val) {
 }
 
 
-void breakpoint::set_real_curr_hit_count(unsigned int hc) {
-    assert(hc >= real_curr_hit_count_);
-
-    // increasing current hit count value
-    curr_hit_count_ += (hc - real_curr_hit_count_);
-
-    real_curr_hit_count_ = hc;
-}
-
-
 unsigned int breakpoint::hit_count() const {
     return hit_count_;
 }
@@ -99,18 +88,10 @@ unsigned int breakpoint::ignore_count() const {
 
 
 bool breakpoint::update(const breakpoint_info * bpinf) {
-
     // updating hit count
-    bool changed = false;
-    assert(bpinf->curr_hit_count() >= real_curr_hit_count_);
-    unsigned int d = bpinf->curr_hit_count() - real_curr_hit_count_;
-    if (d != 0) {
-        // increasing current hit count value
-        curr_hit_count_ += d;
-        real_curr_hit_count_ = bpinf->curr_hit_count();
-
-        changed = true;
-    }
+    unsigned int hc = bpinf->curr_hit_count();
+    bool changed = (hc != curr_hit_count_);
+    curr_hit_count_ = hc;
 
     return changed;
 }

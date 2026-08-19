@@ -112,7 +112,6 @@ BOOST_AUTO_TEST_CASE(add_another_breakpoint) {
     mock_breakpoint bp(src_mdl, 10);
     bp.set_enabled(true);
     bp.set_condition("false");
-    bp.set_real_curr_hit_count(0);
     // add location
     code_position cpos{10, 20, "func", source_position{}};
     std::shared_ptr<breakpoint_location> loc{new breakpoint_location{&bp, 11, cpos}};
@@ -135,7 +134,6 @@ BOOST_AUTO_TEST_CASE(add_another_breakpoint) {
     mock_breakpoint bp2(src_mdl, 12);
     bp2.set_enabled(true);
     bp2.set_condition("1");
-    bp2.set_real_curr_hit_count(0);
     // add location
     code_position cpos2{30, 50, "func2", source_position{}};
     std::shared_ptr<breakpoint_location> loc2{new breakpoint_location{&bp2, 13, cpos2}};
@@ -205,7 +203,6 @@ BOOST_AUTO_TEST_CASE(update_breakpoint) {
     mock_breakpoint bp(src_mdl, 10);
     bp.set_enabled(true);
     bp.set_condition("false");
-    bp.set_real_curr_hit_count(0);
 
     // add location
     code_position cpos{10, 20, "func", source_position{}};
@@ -230,7 +227,11 @@ BOOST_AUTO_TEST_CASE(update_breakpoint) {
 
     bp.set_enabled(false);
     bp.set_condition("true");
-    bp.set_real_curr_hit_count(1);
+    {
+        code_breakpoint_info hit_info{10};
+        hit_info.set_curr_hit_count(1);
+        bp.breakpoint::update(&hit_info);
+    }
 
     code_position cpos2{30, 50, "func2", source_position{}};
     std::shared_ptr<breakpoint_location> loc2{new breakpoint_location{&bp, 12, cpos2}};
@@ -311,7 +312,6 @@ BOOST_AUTO_TEST_CASE(update_breakpoint_childs) {
     mock_breakpoint bp(src_mdl, 10);
     bp.set_enabled(true);
     bp.set_condition("false");
-    bp.set_real_curr_hit_count(0);
 
     // add location
     code_position cpos{10, 20, "func", source_position{}};
@@ -341,7 +341,11 @@ BOOST_AUTO_TEST_CASE(update_breakpoint_childs) {
 
     bp.set_enabled(false);
     bp.set_condition("true");
-    bp.set_real_curr_hit_count(1);
+    {
+        code_breakpoint_info hit_info{10};
+        hit_info.set_curr_hit_count(1);
+        bp.breakpoint::update(&hit_info);
+    }
 
     code_position cpos2{30, 50, "func2", source_position{}};
     std::shared_ptr<breakpoint_location> loc2{new breakpoint_location{&bp, 12, cpos2}};
@@ -440,7 +444,6 @@ BOOST_AUTO_TEST_CASE(remove_breakpoint) {
     mock_breakpoint bp(src_mdl, 10);
     bp.set_enabled(true);
     bp.set_condition("false");
-    bp.set_real_curr_hit_count(0);
     // add location
     code_position cpos{10, 20, "func", source_position{}};
     std::shared_ptr<breakpoint_location> loc{new breakpoint_location{&bp, 11, cpos}};
@@ -452,7 +455,6 @@ BOOST_AUTO_TEST_CASE(remove_breakpoint) {
     mock_breakpoint bp2(src_mdl, 12);
     bp2.set_enabled(true);
     bp2.set_condition("1");
-    bp2.set_real_curr_hit_count(0);
     // add location
     code_position cpos2{30, 50, "func2", source_position{}};
     std::shared_ptr<breakpoint_location> loc2{new breakpoint_location{&bp2, 13, cpos2}};
@@ -538,7 +540,6 @@ BOOST_AUTO_TEST_CASE(check_watchpoints_view) {
     variable_watchpoint wp{10, true, true, 0, "var1"};
     wp.set_enabled(true);
     wp.set_condition("true");
-    wp.set_real_curr_hit_count(0);
     wp.set_address(123456);
 
     model.on_breakpoint_added(&wp);
@@ -557,7 +558,6 @@ BOOST_AUTO_TEST_CASE(check_watchpoints_view) {
     expression_watchpoint wp1{20, false, true, 0, "*abcdef"};
     wp1.set_enabled(true);
     wp1.set_condition("false");
-    wp1.set_real_curr_hit_count(0);
     wp1.set_address(456789);
 
     model.on_breakpoint_added(&wp1);

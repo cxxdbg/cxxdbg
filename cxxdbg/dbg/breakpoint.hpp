@@ -39,7 +39,7 @@ public:
     /// Constructs breakpoint with specified number
     explicit breakpoint(num_t n):
         num_{n}, impl_num_{invalid_num}, enabled_{true}, hit_count_enabled_{false}, hit_count_{1},
-        curr_hit_count_{0}, real_curr_hit_count_{0} {}
+        curr_hit_count_{0} {}
 
     /// Destroys object
     virtual ~breakpoint() = default;
@@ -67,9 +67,6 @@ public:
 
     /// Sets whether hit count condition is enabled
     void set_hit_count_enabled(bool val);
-
-    /// Sets real current hit counter
-    void set_real_curr_hit_count(unsigned int hc);
 
     /// Returns hit count property
     unsigned int hit_count() const;
@@ -99,11 +96,6 @@ protected:
     /// implmentation resets current hit counter
     virtual void before_start();
 
-    /// Resets current real hit count to zero
-    void reset_real_curr_hit_count() {
-        real_curr_hit_count_ = 0;
-    }
-
     /// Returns breakpoint number in implementation
     num_t impl_num() const { return impl_num_; }
 
@@ -119,7 +111,6 @@ protected:
     bool hit_count_enabled_;                ///< Is hit count condition enabled?
     unsigned int hit_count_;                ///< Breakpoint hit count property
     unsigned int curr_hit_count_;           ///< Breakpoint current hit count
-    unsigned int real_curr_hit_count_;      ///< Real current hit count
 };
 
 

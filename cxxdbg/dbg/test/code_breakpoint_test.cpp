@@ -270,7 +270,7 @@ BOOST_AUTO_TEST_CASE(test_update_hit_count) {
     res = bp.update(&bpinf);
 
     BOOST_CHECK(res);
-    BOOST_CHECK(bp.curr_hit_count() == 20);
+    BOOST_CHECK(bp.curr_hit_count() == 50);
 }
 
 

@@ -18,14 +18,6 @@
 namespace cxxdbg::dbg {
 
 
-void watchpoint::before_start() {
-    breakpoint::before_start();
-
-    /// lldb resets current hit count for watchpoints after restart,
-    /// so we should reset current real hit count in base class
-    reset_real_curr_hit_count();
-}
-
 watchpoint::watchpoint(breakpoint_num n, bool read, bool write, size_t size) :
         breakpoint{n},
         read_{read}, write_{write}, size_{size},
