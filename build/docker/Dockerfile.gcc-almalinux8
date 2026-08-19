@@ -79,7 +79,7 @@ WORKDIR /data
 RUN rm -Rf gcc
 
 
-# Set GCC 15 as default
+# Set built GCC as default
 ENV PATH="/opt/gcc-${GCC_VERSION}/bin:$PATH"
 ENV LD_LIBRARY_PATH="/opt/gcc-${GCC_VERSION}/lib64:$LD_LIBRARY_PATH"
 ENV CC="/opt/gcc-${GCC_VERSION}/bin/gcc"

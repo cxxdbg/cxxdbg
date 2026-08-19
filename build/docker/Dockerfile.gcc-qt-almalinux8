@@ -65,8 +65,6 @@ RUN wget https://download.qt.io/official_releases/qt/${QT_VERSION_SHORT}/${QT_VE
 # Build QtBase
 WORKDIR /data/qt/qtbase-build
 
-ENV CC=/opt/gcc-15.1.0/bin/gcc
-ENV CXX=/opt/gcc-15.1.0/bin/g++
 RUN cmake ${QT_SRC_DIR}/qtbase-everywhere-src-${QT_VERSION} \
     -G "Ninja" \
     -DCMAKE_BUILD_TYPE=Release \
@@ -156,9 +154,6 @@ ENV QT_VERSION_SHORT=${QT_VERSION_SHORT}
 ENV QT_VERSION=${QT_VERSION}
 ENV QT_INSTALL_DIR=/opt/Qt/${QT_VERSION}/gcc_64
 ENV PATH="${QT_INSTALL_DIR}/bin:$PATH"
-
-ENV CC=/opt/gcc-${GCC_VERSION}/bin/gcc
-ENV CXX=/opt/gcc-${GCC_VERSION}/bin/g++
 
 # Copy Qt installed from builder stage
 COPY --from=builder ${QT_INSTALL_DIR} ${QT_INSTALL_DIR}
