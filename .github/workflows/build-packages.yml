@@ -14,6 +14,7 @@ on:
 env:
   GCC_VERSION: 15.1.0
   QT_VERSION: 6.11.1
+  NODE_VERSION: 22
   LC_ALL: C.UTF-8
   LANG: C.UTF-8
   BUILD_CPUS: 4
@@ -199,9 +200,65 @@ jobs:
             ci-build/packages/*.zip
           if-no-files-found: error
 
+  build-vscode-extension:
+    name: Build VS Code extension
+    needs: [build-linux-packages, build-macos-packages, build-windows-packages]
+    # Second guard alongside the trigger above: even if this workflow
+    # somehow runs in a fork's context, refuse to execute.
+    if: github.repository == 'cxxdbg/cxxdbg'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Download Linux packages
+        uses: actions/download-artifact@v4
+        with:
+          name: cxxdbg-linux-packages
+          path: packages
+
+      - name: Download macOS packages
+        uses: actions/download-artifact@v4
+        with:
+          name: cxxdbg-macos-packages
+          path: packages
+
+      - name: Download Windows packages
+        uses: actions/download-artifact@v4
+        with:
+          name: cxxdbg-windows-packages
+          path: packages
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "${{ env.NODE_VERSION }}"
+
+      - name: Install vsce
+        run: npm install -g @vscode/vsce
+
+      - name: Build extension
+        run: |
+          cmake -S cxxdbg-vscode -B ci-build \
+                -DCXXDBG_VSCODE_PACKAGES_DIR="${{ github.workspace }}/packages" \
+                -DCXXDBG_VSCODE_ENABLE_LINUX=ON \
+                -DCXXDBG_VSCODE_ENABLE_WINDOWS=ON \
+                -DCXXDBG_VSCODE_ENABLE_MACOS=ON
+          cmake --build ci-build
+
+      - name: Publish extension
+        uses: actions/upload-artifact@v4
+        with:
+          name: cxxdbg-vscode-extension
+          path: ci-build/*.vsix
+          if-no-files-found: error
+
   publish-release:
     name: Publish release
-    needs: [build-linux-packages, build-macos-packages, build-windows-packages]
+    needs: [build-linux-packages, build-macos-packages, build-windows-packages, build-vscode-extension]
     if: github.repository == 'cxxdbg/cxxdbg' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
@@ -224,6 +281,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: cxxdbg-windows-packages
+          path: release-assets
+
+      - name: Download VS Code extension
+        uses: actions/download-artifact@v4
+        with:
+          name: cxxdbg-vscode-extension
           path: release-assets
 
       - name: Create release
