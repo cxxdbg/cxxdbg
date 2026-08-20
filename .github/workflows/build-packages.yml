@@ -249,7 +249,7 @@ jobs:
                 -DCXXDBG_VSCODE_ENABLE_MACOS=ON
           cmake --build ci-build
 
-      - name: Publish extension
+      - name: Upload extension artifact
         uses: actions/upload-artifact@v4
         with:
           name: cxxdbg-vscode-extension
@@ -288,6 +288,18 @@ jobs:
         with:
           name: cxxdbg-vscode-extension
           path: release-assets
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "${{ env.NODE_VERSION }}"
+
+      - name: Publish extension to Marketplace
+        env:
+          CXXDBG_VSCE_PAT: ${{ secrets.CXXDBG_VSCE_PAT }}
+        run: |
+          npm install -g @vscode/vsce
+          vsce publish --packagePath release-assets/*.vsix -p "$CXXDBG_VSCE_PAT"
 
       - name: Create release
         env:
