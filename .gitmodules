@@ -22,3 +22,6 @@
 [submodule "llvm-project"]
 	path = llvm-project
 	url = git@github.com:cxxdbg/llvm-project.git
+[submodule "cxxdbg-vscode"]
+	path = cxxdbg-vscode
+	url = git@github.com:cxxdbg/cxxdbg-vscode.git
