@@ -8,8 +8,8 @@
 # Contains CXXDBG version information
 
 set(CXXDBG_VERSION_MAJOR          0)
-set(CXXDBG_VERSION_MINOR          1)
-set(CXXDBG_VERSION_PATCHLEVEL     1)
+set(CXXDBG_VERSION_MINOR          2)
+set(CXXDBG_VERSION_PATCHLEVEL     0)
 
 # numeric version, major.minor.patchlevel
 set(CXXDBG_VERSION_NUMBER "${CXXDBG_VERSION_MAJOR}.${CXXDBG_VERSION_MINOR}.${CXXDBG_VERSION_PATCHLEVEL}")
