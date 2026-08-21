@@ -319,3 +319,22 @@ jobs:
           gh release edit "${{ github.ref_name }}" \
             --repo "${{ github.repository }}" \
             --draft=false
+
+      - name: Update homebrew tap
+        env:
+          GH_TOKEN: ${{ secrets.CXXDBG_HOMEBREW_TAP_TOKEN }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          sha256=$(shasum -a 256 "release-assets/cxxdbg-${version}-macos.zip" | cut -d' ' -f1)
+
+          git clone "https://x-access-token:${GH_TOKEN}@github.com/cxxdbg/homebrew-cxxdbg.git" homebrew-cxxdbg
+          cd homebrew-cxxdbg
+
+          sed -i -e "s/^  version \".*\"/  version \"${version}\"/" \
+                 -e "s/^  sha256 \".*\"/  sha256 \"${sha256}\"/" \
+                 Casks/cxxdbg.rb
+
+          git config user.name "cxxdbg-bot"
+          git config user.email "support@cxxdbg.org"
+          git commit -am "cxxdbg ${version}"
+          git push
