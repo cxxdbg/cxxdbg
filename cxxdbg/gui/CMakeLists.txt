@@ -282,6 +282,8 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
                        COMMAND "${MACDEPLOYQT_EXECUTABLE}" "$<TARGET_FILE_DIR:cxxdbg>/../.."
                                "-always-overwrite"
                                ${no_strip_opt}
+                       COMMAND "${CMAKE_COMMAND}" -E create_symlink
+                               "../MacOS/CxxDbg" "$<TARGET_FILE_DIR:cxxdbg>/../../Contents/bin/cxxdbg"
                        ${sign_cmd}
                        COMMENT "Running macdeployqt and codesign...")
 endif()
